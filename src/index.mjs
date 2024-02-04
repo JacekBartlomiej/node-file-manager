@@ -1,11 +1,14 @@
 import { getUserName } from "./username/username.mjs";
 import process from "node:process";
+import os from 'os';
 
 let __username = "Unknown";
+const pathToCurrentUserWorkingDir = os.homedir();
 
 const init = () => {
   __username = getUserName();
   console.log(`Welcome to the File Manager, ${__username}`);
+  console.log(`You are currently in ${pathToCurrentUserWorkingDir}`);
   console.log("Please print your command and wait for result...");
   process.on("SIGINT", () => {
     process.exit();
