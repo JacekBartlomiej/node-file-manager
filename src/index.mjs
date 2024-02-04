@@ -4,6 +4,7 @@ import os from 'os';
 
 let __username = "Unknown";
 const pathToCurrentUserWorkingDir = os.homedir();
+const invalidInputMessage = "Invalid input. Please try again to print your command and wait for result...";
 
 const init = () => {
   __username = getUserName();
@@ -22,7 +23,7 @@ const init = () => {
     if (command === exitCommand) {
       process.exit();
     } else {
-      console.log(`You printed: ${data}`);
+      console.log(invalidInputMessage);
     }
   });
 };
