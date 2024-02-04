@@ -4,7 +4,8 @@ import os from 'os';
 import { list } from "./ls/ls.mjs";
 
 let __username = "Unknown";
-const pathToCurrentUserWorkingDir = os.homedir();
+const pathToHomeDir = os.homedir();
+const pathToCurrentUserWorkingDir = pathToHomeDir;
 const invalidInputMessage = "Invalid input. Please try again to print your command and wait for result...";
 const commands = {
   'ls': () => list(pathToCurrentUserWorkingDir)
@@ -14,7 +15,7 @@ const commands = {
 const init = () => {
   __username = getUserName();
   console.log(`Welcome to the File Manager, ${__username}`);
-  console.log(`You are currently in ${pathToCurrentUserWorkingDir}`);
+  printDirInfo(pathToCurrentUserWorkingDir);
   console.log("Please print your command and wait for result...");
   process.on("SIGINT", () => {
     process.exit();
@@ -29,10 +30,15 @@ const init = () => {
       process.exit();
     } else if(!!commands[command]) {
       commands[command]();
+      printDirInfo(pathToCurrentUserWorkingDir);
     } else {
       console.log(invalidInputMessage);
     }
   });
 };
+
+const printDirInfo = (dirInfo) => {
+  console.log(`You are currently in ${dirInfo}`);
+}
 
 init();
