@@ -1,10 +1,15 @@
 import { getUserName } from "./username/username.mjs";
 import process from "node:process";
 import os from 'os';
+import { list } from "./ls/ls.mjs";
 
 let __username = "Unknown";
 const pathToCurrentUserWorkingDir = os.homedir();
 const invalidInputMessage = "Invalid input. Please try again to print your command and wait for result...";
+const commands = {
+  'ls': () => list(pathToCurrentUserWorkingDir)
+}
+
 
 const init = () => {
   __username = getUserName();
@@ -22,6 +27,8 @@ const init = () => {
     const command = data.toString().trim();
     if (command === exitCommand) {
       process.exit();
+    } else if(!!commands[command]) {
+      commands[command]();
     } else {
       console.log(invalidInputMessage);
     }
