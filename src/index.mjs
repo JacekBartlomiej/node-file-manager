@@ -4,7 +4,7 @@ import os from "os";
 import { list } from "./ls/ls.mjs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
-import { cat, add, rn, cp, rm } from "./files/files.mjs";
+import { cat, add, rn, cp, rm, mv } from "./files/files.mjs";
 
 let __username = "Unknown";
 const pathToHomeDir = os.homedir();
@@ -21,6 +21,7 @@ const commands = {
   add: (fileName) => add(pathToCurrentUserWorkingDir, fileName),
   rn: (filePath, newFileName) => rn(pathToCurrentUserWorkingDir, filePath, newFileName),
   cp: (filePath, newDirPath) => cp(pathToCurrentUserWorkingDir, filePath, newDirPath),
+  mv: (filePath, newDirPath) => mv(pathToCurrentUserWorkingDir, filePath, newDirPath),
   rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath)
 };
 

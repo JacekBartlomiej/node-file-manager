@@ -41,3 +41,8 @@ export const rm = async (pathToCurrentUserWorkingDir, filePath) => {
   const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
   nodeRm(fullfilePath);
 };
+
+export const mv = async (pathToCurrentUserWorkingDir, filePath, newDirPath) => {
+  cp(pathToCurrentUserWorkingDir, filePath, newDirPath);
+  rm(pathToCurrentUserWorkingDir, filePath);
+};
