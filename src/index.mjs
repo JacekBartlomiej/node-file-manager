@@ -4,6 +4,7 @@ import os from "os";
 import { list } from "./ls/ls.mjs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
+import { cat } from "./files/files.mjs";
 
 let __username = "Unknown";
 const pathToHomeDir = os.homedir();
@@ -16,6 +17,7 @@ const commands = {
   ls: () => list(pathToCurrentUserWorkingDir),
   cd: (pathToDirectory) => cd(pathToCurrentUserWorkingDir, pathToDirectory),
   up: () => up(pathToCurrentUserWorkingDir),
+  cat: (filePath) => cat(pathToCurrentUserWorkingDir, filePath)
 };
 
 const init = () => {
@@ -24,6 +26,9 @@ const init = () => {
   printDirInfo(pathToCurrentUserWorkingDir);
   console.log("Please print your command and wait for result...");
   //TODO: check if process can be changed to Readline api
+  process.on("uncaughtException", () => {
+    console.log(operationFailedMessage);
+  });
   process.on("SIGINT", () => {
     process.exit();
   });
