@@ -1,11 +1,12 @@
 import { getUserName } from "./username/username.mjs";
 import process from "node:process";
-import * as nodeOs from 'node:os';
+import * as nodeOs from "node:os";
 import { os } from "./os/os.mjs";
 import { list } from "./ls/ls.mjs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import { cat, add, rn, cp, rm, mv } from "./files/files.mjs";
+import { hash } from "./hash/hash.mjs";
 
 let __username = "Unknown";
 const pathToHomeDir = nodeOs.homedir();
@@ -20,11 +21,15 @@ const commands = {
   up: () => up(pathToCurrentUserWorkingDir),
   cat: (filePath) => cat(pathToCurrentUserWorkingDir, filePath),
   add: (fileName) => add(pathToCurrentUserWorkingDir, fileName),
-  rn: (filePath, newFileName) => rn(pathToCurrentUserWorkingDir, filePath, newFileName),
-  cp: (filePath, newDirPath) => cp(pathToCurrentUserWorkingDir, filePath, newDirPath),
-  mv: (filePath, newDirPath) => mv(pathToCurrentUserWorkingDir, filePath, newDirPath),
+  rn: (filePath, newFileName) =>
+    rn(pathToCurrentUserWorkingDir, filePath, newFileName),
+  cp: (filePath, newDirPath) =>
+    cp(pathToCurrentUserWorkingDir, filePath, newDirPath),
+  mv: (filePath, newDirPath) =>
+    mv(pathToCurrentUserWorkingDir, filePath, newDirPath),
   rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath),
-  os: (param) => os(param), 
+  os: (param) => os(param),
+  hash: (filePath) => hash(pathToCurrentUserWorkingDir, filePath),
 };
 
 const init = () => {
