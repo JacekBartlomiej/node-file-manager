@@ -16,6 +16,22 @@ const invalidInputMessage =
   "Invalid input. Please try again to print your command and wait for result...";
 const operationFailedMessage =
   "Operation failed. Please try again to print your command and wait for result...";
+const promptInfo = "Please print your command and wait for result...";
+const commandsArguments = {
+  ls: 0,
+  cd: 1,
+  up: 0,
+  cat: 1,
+  add: 1,
+  rn: 2,
+  cp: 2,
+  mv: 2,
+  rm: 1,
+  os: 1,
+  hash: 1,
+  compress: 2,
+  decompress: 2,
+};
 const commands = {
   ls: () => list(pathToCurrentUserWorkingDir),
   cd: (pathToDirectory) => cd(pathToCurrentUserWorkingDir, pathToDirectory),
@@ -31,17 +47,20 @@ const commands = {
   rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath),
   os: (param) => os(param),
   hash: (filePath) => hash(pathToCurrentUserWorkingDir, filePath),
-  compress: (filePath, destinationPath) => compress(pathToCurrentUserWorkingDir, filePath, destinationPath),
-  decompress: (filePath, destinationPath) => decompress(pathToCurrentUserWorkingDir, filePath, destinationPath)
+  compress: (filePath, destinationPath) =>
+    compress(pathToCurrentUserWorkingDir, filePath, destinationPath),
+  decompress: (filePath, destinationPath) =>
+    decompress(pathToCurrentUserWorkingDir, filePath, destinationPath),
 };
 
 const init = () => {
   __username = getUserName();
   console.log(`Welcome to the File Manager, ${__username}`);
   printDirInfo(pathToCurrentUserWorkingDir);
-  console.log("Please print your command and wait for result...");
+  printPromptInfo();
   //TODO: check if process can be changed to Readline api
   process.on("uncaughtException", (err) => {
+    printDirInfo(pathToCurrentUserWorkingDir);
     console.log(operationFailedMessage);
   });
   process.on("SIGINT", () => {
@@ -59,17 +78,27 @@ const init = () => {
       try {
         const commandWord = command.split(" ")[0];
         const args = command.split(" ").slice(1);
-        if (args) {
-          await commands[commandWord](...args);
-        } else {
-          //TODO: add additional check if redundant args provided by user
-          await commands[commandWord]();
+        if (args.length !== commandsArguments[commandWord]) {
+          printDirInfo(pathToCurrentUserWorkingDir);
+          console.log(invalidInputMessage);
+          return;
         }
-        printDirInfo(pathToCurrentUserWorkingDir);
+        let result;
+        if (args) {
+          result = await commands[commandWord](...args);
+        } else {
+          result = await commands[commandWord]();
+        }
+        if (result) {
+          printDirInfo(pathToCurrentUserWorkingDir);
+          printPromptInfo();
+        }
       } catch {
+        printDirInfo(pathToCurrentUserWorkingDir);
         console.log(operationFailedMessage);
       }
     } else {
+      printDirInfo(pathToCurrentUserWorkingDir);
       console.log(invalidInputMessage);
     }
   });
@@ -79,18 +108,33 @@ const printDirInfo = (dirInfo) => {
   console.log(`You are currently in ${dirInfo}`);
 };
 
+const printPromptInfo = () => {
+  console.log(promptInfo);
+};
+
 const cd = async (basePath, dir) => {
-  const dirPath = path.resolve(basePath, dir);
-  await stat(dirPath);
-  updatePathToCurrentUserWorkingDir(dirPath);
+  return new Promise(async (resolve) => {
+    const dirPath = path.resolve(basePath, dir);
+    const exists = await stat(dirPath);
+    if (exists) {
+      updatePathToCurrentUserWorkingDir(dirPath);
+      resolve(true);
+    } else {
+      resolve(false);
+    }
+  });
 };
 
 const up = async (basePath) => {
-  if (basePath === pathToHomeDir) {
-    return;
-  }
-  const upPath = path.join(...basePath.split(path.sep).slice(0, -1));
-  updatePathToCurrentUserWorkingDir(upPath);
+  return new Promise(async (resolve) => {
+    if (basePath === pathToHomeDir) {
+      resolve(true);
+      return;
+    }
+    const upPath = path.join(...basePath.split(path.sep).slice(0, -1));
+    updatePathToCurrentUserWorkingDir(upPath);
+    resolve(true);
+  });
 };
 
 const updatePathToCurrentUserWorkingDir = (newPath) => {

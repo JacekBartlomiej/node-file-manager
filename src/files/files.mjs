@@ -1,19 +1,29 @@
 import { createReadStream, createWriteStream } from "node:fs";
-import { stdout } from "node:process";
+import process from "node:process";
 import path from "node:path";
 import { writeFile, rename, rm as nodeRm } from "node:fs/promises";
 
 export const cat = async (pathToCurrentUserWorkingDir, filePath) => {
-  const resolvedPath = path.resolve(pathToCurrentUserWorkingDir, filePath);
-  const stream = await createReadStream(resolvedPath);
-  //TODO: cursor should be new line
-  //TODO: prompt and where you are info should be after text that was printed
-  stream.pipe(stdout);
+  return new Promise(async (resolve) => {
+    const resolvedPath = path.resolve(pathToCurrentUserWorkingDir, filePath);
+    const stream = await createReadStream(resolvedPath);
+    if (stream) {
+      stream.pipe(process.stdout);
+      stream.on("close", () => {
+        console.log("");
+        resolve(true);
+      });
+    } else {
+      resolve(false);
+    }
+  });
 };
 
 export const add = async (pathToCurrentUserWorkingDir, fileName) => {
-  const resolvedPath = path.resolve(pathToCurrentUserWorkingDir, fileName);
-  await writeFile(resolvedPath, "");
+  return new Promise(async (resolve) => {
+    const resolvedPath = path.resolve(pathToCurrentUserWorkingDir, fileName);
+    writeFile(resolvedPath, "").then(() => resolve(true));
+  });
 };
 
 export const rn = async (
@@ -21,28 +31,39 @@ export const rn = async (
   filePath,
   newFileName
 ) => {
-  const oldFilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
-  const basePath = path.join(...oldFilePath.split(path.sep).slice(0, -1));
-  const newFilePath = path.resolve(basePath, newFileName);
-  await rename(oldFilePath, newFilePath);
+  return new Promise(async (resolve) => {
+    const oldFilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
+    const basePath = path.join(...oldFilePath.split(path.sep).slice(0, -1));
+    const newFilePath = path.resolve(basePath, newFileName);
+    rename(oldFilePath, newFilePath).then(() => resolve(true));
+  });
 };
 
 export const cp = async (pathToCurrentUserWorkingDir, filePath, newDirPath) => {
-  //TODO: check about copying to up dir
-  const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
-  const fileName = fullfilePath.split(path.sep).pop();
-  const basePath = path.join(...fullfilePath.split(path.sep).slice(0, -1));
-  const newFilePath = path.resolve(basePath, newDirPath, fileName);
-  const stream = await createReadStream(fullfilePath);
-  stream.pipe(createWriteStream(newFilePath));
+  return new Promise(async (resolve) => {
+    const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
+    const fileName = fullfilePath.split(path.sep).pop();
+    const basePath = path.join(...fullfilePath.split(path.sep).slice(0, -1));
+    const newFilePath = path.resolve(basePath, newDirPath, fileName);
+    const stream = await createReadStream(fullfilePath);
+    stream.pipe(createWriteStream(newFilePath));
+    stream.on("close", () => {
+      resolve(true);
+    });
+  });
 };
 
 export const rm = async (pathToCurrentUserWorkingDir, filePath) => {
-  const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
-  nodeRm(fullfilePath);
+  return new Promise(async (resolve) => {
+    const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
+    nodeRm(fullfilePath).then(() => resolve(true));
+  });
 };
 
 export const mv = async (pathToCurrentUserWorkingDir, filePath, newDirPath) => {
-  cp(pathToCurrentUserWorkingDir, filePath, newDirPath);
-  rm(pathToCurrentUserWorkingDir, filePath);
+  return new Promise(async (resolve) => {
+    cp(pathToCurrentUserWorkingDir, filePath, newDirPath)
+      .then(() => rm(pathToCurrentUserWorkingDir, filePath))
+      .then(() => resolve(true));
+  });
 };

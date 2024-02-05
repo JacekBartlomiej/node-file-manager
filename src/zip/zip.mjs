@@ -11,15 +11,17 @@ export const compress = async (
   pathToFile,
   pathToDestination
 ) => {
-  const sourcePath = path.resolve(pathToCurrentUserWorkingDir, pathToFile);
-  const destinationPath = path.resolve(
-    pathToCurrentUserWorkingDir,
-    pathToDestination
-  );
-  const gzip = createBrotliCompress();
-  const source = createReadStream(sourcePath);
-  const destination = createWriteStream(destinationPath);
-  await pipe(source, gzip, destination);
+  return new Promise(async (resolve) => {
+    const sourcePath = path.resolve(pathToCurrentUserWorkingDir, pathToFile);
+    const destinationPath = path.resolve(
+      pathToCurrentUserWorkingDir,
+      pathToDestination
+    );
+    const gzip = createBrotliCompress();
+    const source = createReadStream(sourcePath);
+    const destination = createWriteStream(destinationPath);
+    pipe(source, gzip, destination).then(() => resolve(true));
+  });
 };
 
 export const decompress = async (
@@ -27,13 +29,15 @@ export const decompress = async (
   pathToFile,
   pathToDestination
 ) => {
-  const sourcePath = path.resolve(pathToCurrentUserWorkingDir, pathToFile);
-  const destinationPath = path.resolve(
-    pathToCurrentUserWorkingDir,
-    pathToDestination
-  );
-  const unzip = createBrotliDecompress();
-  const source = createReadStream(sourcePath);
-  const destination = createWriteStream(destinationPath);
-  await pipe(source, unzip, destination);
+  return new Promise(async (resolve) => {
+    const sourcePath = path.resolve(pathToCurrentUserWorkingDir, pathToFile);
+    const destinationPath = path.resolve(
+      pathToCurrentUserWorkingDir,
+      pathToDestination
+    );
+    const unzip = createBrotliDecompress();
+    const source = createReadStream(sourcePath);
+    const destination = createWriteStream(destinationPath);
+    pipe(source, unzip, destination).then(() => resolve(true));
+  });
 };
