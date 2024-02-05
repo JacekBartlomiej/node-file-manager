@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.mjs",
-    "start as Jacek": "npm run start -- --username=Jacek",
+    "start as Jacek": "npm run start -- --username=JohnDoe",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jacek Klosinski",
