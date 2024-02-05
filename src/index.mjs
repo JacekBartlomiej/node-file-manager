@@ -1,10 +1,9 @@
 import { getUserName } from "./username/username.mjs";
 import process from "node:process";
 import * as nodeOs from "node:os";
+import { cd, up } from "./nav/nav.mjs";
 import { os } from "./os/os.mjs";
 import { list } from "./ls/ls.mjs";
-import { stat } from "node:fs/promises";
-import path from "node:path";
 import { cat, add, rn, cp, rm, mv } from "./files/files.mjs";
 import { hash } from "./hash/hash.mjs";
 import { compress, decompress } from "./zip/zip.mjs";
@@ -12,11 +11,6 @@ import { compress, decompress } from "./zip/zip.mjs";
 let __username = "Unknown";
 const pathToHomeDir = nodeOs.homedir();
 let pathToCurrentUserWorkingDir = pathToHomeDir;
-const invalidInputMessage =
-  "Invalid input. Please try again to print your command and wait for result...";
-const operationFailedMessage =
-  "Operation failed. Please try again to print your command and wait for result...";
-const promptInfo = "Please print your command and wait for result...";
 const commandsArguments = {
   ls: 0,
   cd: 1,
@@ -34,8 +28,18 @@ const commandsArguments = {
 };
 const commands = {
   ls: () => list(pathToCurrentUserWorkingDir),
-  cd: (pathToDirectory) => cd(pathToCurrentUserWorkingDir, pathToDirectory),
-  up: () => up(pathToCurrentUserWorkingDir),
+  cd: (pathToDirectory) =>
+    cd(
+      pathToCurrentUserWorkingDir,
+      pathToDirectory,
+      updatePathToCurrentUserWorkingDir
+    ),
+  up: () =>
+    up(
+      pathToCurrentUserWorkingDir,
+      pathToHomeDir,
+      updatePathToCurrentUserWorkingDir
+    ),
   cat: (filePath) => cat(pathToCurrentUserWorkingDir, filePath),
   add: (fileName) => add(pathToCurrentUserWorkingDir, fileName),
   rn: (filePath, newFileName) =>
@@ -56,12 +60,10 @@ const commands = {
 const init = () => {
   __username = getUserName();
   console.log(`Welcome to the File Manager, ${__username}`);
-  printDirInfo(pathToCurrentUserWorkingDir);
   printPromptInfo();
   //TODO: check if process can be changed to Readline api
   process.on("uncaughtException", (err) => {
-    printDirInfo(pathToCurrentUserWorkingDir);
-    console.log(operationFailedMessage);
+    printOperationFailedInfo();
   });
   process.on("SIGINT", () => {
     process.exit();
@@ -79,8 +81,7 @@ const init = () => {
         const commandWord = command.split(" ")[0];
         const args = command.split(" ").slice(1);
         if (args.length !== commandsArguments[commandWord]) {
-          printDirInfo(pathToCurrentUserWorkingDir);
-          console.log(invalidInputMessage);
+          printInvalidInputInfo();
           return;
         }
         let result;
@@ -90,51 +91,39 @@ const init = () => {
           result = await commands[commandWord]();
         }
         if (result) {
-          printDirInfo(pathToCurrentUserWorkingDir);
           printPromptInfo();
         }
       } catch {
-        printDirInfo(pathToCurrentUserWorkingDir);
-        console.log(operationFailedMessage);
+        printOperationFailedInfo();
       }
     } else {
-      printDirInfo(pathToCurrentUserWorkingDir);
-      console.log(invalidInputMessage);
+      printInvalidInputInfo();
     }
   });
 };
 
-const printDirInfo = (dirInfo) => {
-  console.log(`You are currently in ${dirInfo}`);
+const printDirInfo = () => {
+  console.log(`You are currently in ${pathToCurrentUserWorkingDir}`);
 };
 
 const printPromptInfo = () => {
+  printDirInfo();
+  const promptInfo = "Please print your command and wait for result...";
   console.log(promptInfo);
 };
 
-const cd = async (basePath, dir) => {
-  return new Promise(async (resolve) => {
-    const dirPath = path.resolve(basePath, dir);
-    const exists = await stat(dirPath);
-    if (exists) {
-      updatePathToCurrentUserWorkingDir(dirPath);
-      resolve(true);
-    } else {
-      resolve(false);
-    }
-  });
+const printOperationFailedInfo = () => {
+  printDirInfo();
+  const operationFailedMessage =
+    "Operation failed. Please try again to print your command and wait for result...";
+  console.log(operationFailedMessage);
 };
 
-const up = async (basePath) => {
-  return new Promise(async (resolve) => {
-    if (basePath === pathToHomeDir) {
-      resolve(true);
-      return;
-    }
-    const upPath = path.join(...basePath.split(path.sep).slice(0, -1));
-    updatePathToCurrentUserWorkingDir(upPath);
-    resolve(true);
-  });
+const printInvalidInputInfo = () => {
+  printDirInfo();
+  const invalidInputMessage =
+    "Invalid input. Please try again to print your command and wait for result...";
+  console.log(invalidInputMessage);
 };
 
 const updatePathToCurrentUserWorkingDir = (newPath) => {
