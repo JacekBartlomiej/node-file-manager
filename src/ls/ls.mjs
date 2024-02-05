@@ -13,6 +13,7 @@ const sortFiles = (a, b) => {
 
 export const list = async (path) => {
   const files = await readdir(path, { withFileTypes: true });
+  //TODO: check what it means: "type of directory content should be marked explicitly (e.g. as a corresponding column value)"
   console.table(
     files.map((file) => ({
       Name: file.name,
