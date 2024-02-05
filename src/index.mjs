@@ -7,6 +7,7 @@ import { stat } from "node:fs/promises";
 import path from "node:path";
 import { cat, add, rn, cp, rm, mv } from "./files/files.mjs";
 import { hash } from "./hash/hash.mjs";
+import { compress, decompress } from "./zip/zip.mjs";
 
 let __username = "Unknown";
 const pathToHomeDir = nodeOs.homedir();
@@ -30,6 +31,8 @@ const commands = {
   rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath),
   os: (param) => os(param),
   hash: (filePath) => hash(pathToCurrentUserWorkingDir, filePath),
+  compress: (filePath, destinationPath) => compress(pathToCurrentUserWorkingDir, filePath, destinationPath),
+  decompress: (filePath, destinationPath) => decompress(pathToCurrentUserWorkingDir, filePath, destinationPath)
 };
 
 const init = () => {
@@ -38,7 +41,7 @@ const init = () => {
   printDirInfo(pathToCurrentUserWorkingDir);
   console.log("Please print your command and wait for result...");
   //TODO: check if process can be changed to Readline api
-  process.on("uncaughtException", () => {
+  process.on("uncaughtException", (err) => {
     console.log(operationFailedMessage);
   });
   process.on("SIGINT", () => {
