@@ -1,4 +1,4 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, createWriteStream } from "node:fs";
 import { stdout } from "node:process";
 import path from "node:path";
 import { writeFile, rename } from "node:fs/promises";
@@ -21,4 +21,14 @@ export const rn = async (pathToCurrentUserWorkingDir, filePath, newFileName) => 
     const basePath = path.join(...oldFilePath.split(path.sep).slice(0, -1));
     const newFilePath = path.resolve(basePath, newFileName);
     await rename(oldFilePath, newFilePath);
+};
+
+export const cp = async (pathToCurrentUserWorkingDir, filePath, newDirPath) => {
+    //TODO: check about copying to up dir
+    const fullfilePath = path.resolve(pathToCurrentUserWorkingDir, filePath);
+    const fileName = fullfilePath.split(path.sep).pop();
+    const basePath = path.join(...fullfilePath.split(path.sep).slice(0, -1));
+    const newFilePath = path.resolve(basePath, newDirPath, fileName);
+    const stream = await createReadStream(fullfilePath);
+    stream.pipe(createWriteStream(newFilePath));
 };
