@@ -1,13 +1,14 @@
 import { getUserName } from "./username/username.mjs";
 import process from "node:process";
-import os from "os";
+import * as nodeOs from 'node:os';
+import { os } from "./os/os.mjs";
 import { list } from "./ls/ls.mjs";
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import { cat, add, rn, cp, rm, mv } from "./files/files.mjs";
 
 let __username = "Unknown";
-const pathToHomeDir = os.homedir();
+const pathToHomeDir = nodeOs.homedir();
 let pathToCurrentUserWorkingDir = pathToHomeDir;
 const invalidInputMessage =
   "Invalid input. Please try again to print your command and wait for result...";
@@ -22,7 +23,8 @@ const commands = {
   rn: (filePath, newFileName) => rn(pathToCurrentUserWorkingDir, filePath, newFileName),
   cp: (filePath, newDirPath) => cp(pathToCurrentUserWorkingDir, filePath, newDirPath),
   mv: (filePath, newDirPath) => mv(pathToCurrentUserWorkingDir, filePath, newDirPath),
-  rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath)
+  rm: (filePath) => rm(pathToCurrentUserWorkingDir, filePath),
+  os: (param) => os(param), 
 };
 
 const init = () => {
